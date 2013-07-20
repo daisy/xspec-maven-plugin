@@ -20,10 +20,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.transform.ErrorListener;
+import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
@@ -115,6 +118,8 @@ public class XSpecRunner {
 			xspecCompiler.setDestination(xspecTestCompiled);
 			xspecCompiler.setErrorListener(saxonReporter);
 			xspecCompiler.setMessageListener(saxonReporter);
+			xspecCompiler.setURIResolver(new XSpecResolver(xspecCompiler
+					.getURIResolver()));
 			xspecCompiler.transform();
 
 			// Create a new URI resolver if a mock catalog is present
@@ -128,15 +133,16 @@ public class XSpecRunner {
 
 			// Run the compiled XSpec test
 			XsltCompiler xspecTestCompiler = processor.newXsltCompiler();
-			xspecTestCompiler.setURIResolver(testResolver);
-			processor.getUnderlyingConfiguration().setErrorListener(saxonReporter);
+			xspecTestCompiler.setURIResolver(new XSpecResolver(testResolver));
+			processor.getUnderlyingConfiguration().setErrorListener(
+					saxonReporter);
 			XsltTransformer xspecTestRunner = xspecTestCompiler.compile(
 					xspecTestCompiled.getXdmNode().asSource()).load();
 			xspecTestRunner.setInitialTemplate(XSPEC_MAIN_TEMPLATE);
 			xspecTestRunner.setDestination(xspecTestResult);
 			xspecTestRunner.setErrorListener(saxonReporter);
 			xspecTestRunner.setMessageListener(saxonReporter);
-			xspecTestRunner.setURIResolver(testResolver);
+			xspecTestRunner.setURIResolver(new XSpecResolver(testResolver));
 			xspecTestRunner.transform();
 
 		} catch (SaxonApiException e) {
@@ -154,7 +160,7 @@ public class XSpecRunner {
 						executionException, stopwatch.toString());
 
 		report(result.toString(), writer);
-		
+
 		writer.close();
 
 		if (result.getErrors() == 0) {
@@ -212,23 +218,19 @@ public class XSpecRunner {
 				.getURIResolver();
 
 		XsltCompiler xsltCompiler = processor.newXsltCompiler();
+		xsltCompiler.setURIResolver(new XSpecResolver(xsltCompiler
+				.getURIResolver()));
 		// Initialize the XSpec compiler
-		xspecCompilerLoader = xsltCompiler.compile(new StreamSource(
-				XSpecRunner.class.getResource(
-						"/xspec/compiler/generate-xspec-tests.xsl")
-						.toExternalForm()));
+		xspecCompilerLoader = xsltCompiler
+				.compile(getXSpecSource("/xspec/compiler/generate-xspec-tests.xsl"));
 
 		// Initialize the XSpec report formatter
-		xspecHtmlFormatterLoader = xsltCompiler.compile(new StreamSource(
-				XSpecRunner.class.getResource(
-						"/xspec/reporter/format-xspec-report.xsl")
-						.toExternalForm()));
+		xspecHtmlFormatterLoader = xsltCompiler
+				.compile(getXSpecSource("/xspec/reporter/format-xspec-report.xsl"));
 
 		// Initialize the JUnit report formatter
-		xspecJUnitFormatterLoader = xsltCompiler.compile(new StreamSource(
-				XSpecRunner.class.getResource(
-						"/xspec-extra/format-junit-report.xsl")
-						.toExternalForm()));
+		xspecJUnitFormatterLoader = xsltCompiler
+				.compile(getXSpecSource("/xspec-extra/format-junit-report.xsl"));
 
 		// Configure the XPath compiler used to parse the XSpec report
 		xpathCompiler = processor.newXPathCompiler();
@@ -243,6 +245,11 @@ public class XSpecRunner {
 	private static void report(String message, PrintWriter writer) {
 		System.out.println(message);
 		writer.println(message);
+	}
+
+	private static Source getXSpecSource(String path) {
+		return new StreamSource(XSpecRunner.class.getResourceAsStream(path),
+				"xspec:" + path);
 	}
 
 	private static class SaxonReporter implements ErrorListener,
@@ -275,29 +282,56 @@ public class XSpecRunner {
 		}
 
 	}
+
 	private static class SaxonSinkReporter implements ErrorListener,
-	MessageListener {
-		
+			MessageListener {
+
 		static SaxonSinkReporter INSTANCE = new SaxonSinkReporter();
-		
+
 		private SaxonSinkReporter() {
 		}
-		
+
 		public void warning(TransformerException exception)
 				throws TransformerException {
 		}
-		
+
 		public void error(TransformerException exception)
 				throws TransformerException {
 		}
-		
+
 		public void fatalError(TransformerException exception)
 				throws TransformerException {
 		}
-		
+
 		public void message(XdmNode content, boolean terminate,
 				SourceLocator locator) {
 		}
-		
+
+	}
+
+	private static class XSpecResolver implements URIResolver {
+
+		private final URIResolver delegate;
+
+		public XSpecResolver(URIResolver delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public Source resolve(String href, String base)
+				throws TransformerException {
+			try {
+				String uri = new URI(base).resolve(href).toString();
+				if (uri.startsWith("xspec:")) {
+					InputStream is = XSpecRunner.class.getResourceAsStream(uri
+							.substring(6));
+					return new StreamSource(is, uri);
+				}
+			} catch (URISyntaxException e) {
+				// Do nothing
+			}
+			return delegate.resolve(href, base);
+		}
+
 	}
 }

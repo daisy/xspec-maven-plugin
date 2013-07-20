@@ -153,6 +153,6 @@ public class XSpecRunnerTest {
 				testsDir, "nomocking/test.xspec"));
 		TestResults results = xspecRunner.run(tests, reportDir);
 		assertThat(results.toString(),
-				startsWith("Tests run: 1, Failures: 1, Errors: 0, Skipped: 0"));
+				startsWith("Tests run: 0, Failures: 0, Errors: 1, Skipped: 0"));
 	}
 }
