@@ -3,8 +3,11 @@ language: java
 # clone "travis" branch containing deployment settings
 before_install: git clone -b travis `git config --get remote.origin.url` target/travis
 
-# main build command with "mvn deploy"
-after_success: mvn deploy --settings target/travis/settings.xml
+# main task, run the verify goal
+script: mvn verify
+
+# if the build succeeds, deploy the artifact (tests are skipped)
+after_success: mvn deploy -DskipTests -Dinvoker.skip=true
 
 # whitelist; only deploy master branch
 branches:
@@ -13,5 +16,5 @@ branches:
 
 env:
   global:
-    - secure: ! "fZwP2yFnNu7Lw4iq+pRt0elfCdznruIEqaWXcii5z4xgfEQrsNtMmeb+5WdMx/tAz0k9aGULJ3dCXJxKVk01Gg0DeeVMVommog3bNY8rrKsefSY17T2pSha7HQUkLw1L90BanmY0pzZa+1GXmgRvIuuzNAZlPgiJk+CGZZH4P4w="
+    - secure: "fZwP2yFnNu7Lw4iq+pRt0elfCdznruIEqaWXcii5z4xgfEQrsNtMmeb+5WdMx/tAz0k9aGULJ3dCXJxKVk01Gg0DeeVMVommog3bNY8rrKsefSY17T2pSha7HQUkLw1L90BanmY0pzZa+1GXmgRvIuuzNAZlPgiJk+CGZZH4P4w="
     - secure: "j2n6tWH7WFz2fToJagZm+m/GyRtIUW7O4+TSFEVmQ7AOtN7jURkFbwQrQfuFgOr+us2cCnr4ivNpuEoITEo7yBmxsQiAFDiR3RNGGv5J9xyBBBPSBd4mwhW5sAzQsc0H25EF2DpHZRULdSEpGsZNZmipzkPUBb4qF6D5Xg17Awo="
