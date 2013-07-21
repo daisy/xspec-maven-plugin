@@ -1,1 +1,17 @@
 language: java
+
+# clone "travis" branch containing deployment settings
+before_install: git clone -b travis `git config --get remote.origin.url` target/travis
+
+# main build command with "mvn deploy"
+after_success: mvn deploy --settings target/travis/settings.xml
+
+# whitelist; only deploy master branch
+branches:
+  only:
+  - master
+
+env:
+  global:
+    - secure: "fZwP2yFnNu7Lw4iq+pRt0elfCdznruIEqaWXcii5z4xgfEQrsNtMmeb+5WdMx/tAz0k9aGULJ3dCXJxKVk01Gg0DeeVMVommog3bNY8rrKsefSY17T2pSha7HQUkLw1L90BanmY0pzZa+1GXmgRvIuuzNAZlPgiJk+CGZZH4P4w="
+    - secure: "fTseFJ6m/EZHMQxrUQH8lX5PEnw3+FCjH9T3sV/lr1bTgY+pME7DwsQpvXiH6mRc3aJzvjTZMdvLfO24pY6TovCRDjuQkYtS1bMMup6DuTtZCFiBzp6qoB54mfu3UC9KeWDfkrBpQQIqqhLDQy24Cag9qu7c3S2VFldoIbiHyPk="
