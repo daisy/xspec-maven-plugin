@@ -23,9 +23,8 @@
                 <executions>
                     <execution>
                         <id>xspec-tests</id>
-                        <phase>test</phase>
                         <goals>
-                            <goal>xspec</goal>
+                            <goal>test</goal>
                         </goals>
                     </execution>
                 </executions>
