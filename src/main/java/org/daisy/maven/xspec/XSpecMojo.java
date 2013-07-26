@@ -55,10 +55,10 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 /**
- * Goal which runs XSpec tests and produces various reports.
+ * Run XSpec tests and produce various reports.
  * 
  */
-@Mojo(name = "xspec", defaultPhase = LifecyclePhase.TEST)
+@Mojo(name = "test", defaultPhase = LifecyclePhase.TEST)
 public class XSpecMojo extends AbstractMojo {
 
 	private static final String pluginName = "XSpec";
@@ -103,13 +103,13 @@ public class XSpecMojo extends AbstractMojo {
 	 * Specify this parameter to run individual tests by file name, overriding
 	 * the <code>includes/excludes</code> parameters. Each pattern you specify
 	 * here will be used to create an include pattern formatted like
-	 * <code>**&#47;${test}.xspec</code>, so you can just type "-Dtest=MyTest"
+	 * <code>**&#47;${test}.xspec</code>, so you can just type "-Dxspec=MyTest"
 	 * to run a single test called "xspec/MyTest.xspec". The test patterns
 	 * prefixed with a <code>!</code> will be excluded.<br/>
 	 * This parameter overrides the <code>includes/excludes</code> parameters
 	 * <p/>
 	 */
-	@Parameter(property = "test")
+	@Parameter(property = "xspec")
 	private String test;
 
 	/**
