@@ -152,6 +152,7 @@ public class XSpecMojo extends AbstractMojo {
 
 			logHeader();
 			try {
+				xspecRunner.init();
 				TestResults testResults = xspecRunner.run(scanTests(),
 						reportsDirectory);
 				System.out.println(testResults.toDetailedString());
