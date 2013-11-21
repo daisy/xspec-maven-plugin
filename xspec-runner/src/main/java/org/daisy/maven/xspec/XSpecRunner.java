@@ -75,12 +75,8 @@ public class XSpecRunner {
 	private XsltExecutable xspecJUnitFormatterLoader;
 	private InputSupplier<InputStream> cssSupplier;
 
-	public XSpecRunner() {
-		try {
-			init();
-		} catch (SaxonApiException e) {
-			throw new IllegalStateException(e);
-		}
+	public void setProcessor(Processor processor) {
+		this.processor = processor;
 	}
 
 	public TestResults run(Map<String, File> tests, File reportDir) {
@@ -211,9 +207,12 @@ public class XSpecRunner {
 		return result;
 	}
 
-	private void init() throws SaxonApiException {
+	public void init() {
+		try {
+
 		System.setProperty("xml.catalog.ignoreMissing", "true");
-		processor = new Processor(false);
+		if (processor == null)
+			processor = new Processor(false);
 		defaultResolver = processor.getUnderlyingConfiguration()
 				.getURIResolver();
 
@@ -240,6 +239,10 @@ public class XSpecRunner {
 		// Input supplier for the report CSS
 		cssSupplier = Resources.newInputStreamSupplier(XSpecRunner.class
 				.getResource("/xspec/reporter/test-report.css"));
+
+		} catch (SaxonApiException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	private static void report(String message, PrintWriter writer) {

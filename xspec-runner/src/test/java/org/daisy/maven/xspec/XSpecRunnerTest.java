@@ -33,7 +33,7 @@ import com.google.common.io.Files;
 public class XSpecRunnerTest {
 
 	private static PrintStream SYSOUT = System.out;
-	private static File testsDir = new File(new File(XSpecMojoTest.class
+	private static File testsDir = new File(new File(XSpecRunnerTest.class
 			.getResource("/").getPath()), "xspec-real");
 	private XSpecRunner xspecRunner;
 	private File reportDir;
@@ -42,6 +42,7 @@ public class XSpecRunnerTest {
 	public void setup() {
 		System.setOut(new PrintStream(ByteStreams.nullOutputStream()));
 		xspecRunner = new XSpecRunner();
+		xspecRunner.init();
 		reportDir = Files.createTempDir();
 		reportDir.deleteOnExit();
 	}
