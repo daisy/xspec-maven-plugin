@@ -114,12 +114,13 @@ public class XSpecRunnerTest {
 		Map<String, File> tests = ImmutableMap.of("test", new File(testsDir,
 				"test.xspec"));
 		xspecRunner.run(tests, reportDir);
-		assertThat(reportDir.list().length, equalTo(5));
+		assertThat(reportDir.list().length, equalTo(6));
 		assertThat(reportDir.list(), hasItemInArray("xspec-report.css"));
 		assertThat(reportDir.list(), hasItemInArray("OUT-test.txt"));
 		assertThat(reportDir.list(), hasItemInArray("HTML-test.html"));
 		assertThat(reportDir.list(), hasItemInArray("XSPEC-test.xml"));
 		assertThat(reportDir.list(), hasItemInArray("TEST-test.xml"));
+		assertThat(reportDir.list(), hasItemInArray("index.html"));
 	}
 
 	@Test
@@ -127,8 +128,9 @@ public class XSpecRunnerTest {
 		Map<String, File> tests = ImmutableMap.of("test", new File(testsDir,
 				"error.xspec"));
 		xspecRunner.run(tests, reportDir);
-		assertThat(reportDir.list().length, equalTo(1));
+		assertThat(reportDir.list().length, equalTo(2));
 		assertThat(reportDir.list(), hasItemInArray("OUT-test.txt"));
+		assertThat(reportDir.list(), hasItemInArray("index.html"));
 	}
 
 	@Test
@@ -136,7 +138,7 @@ public class XSpecRunnerTest {
 		Map<String, File> tests = ImmutableMap.of("complete", new File(
 				testsDir, "complete.xspec"));
 		xspecRunner.run(tests, reportDir);
-		assertThat(reportDir.list().length, equalTo(5));
+		assertThat(reportDir.list().length, equalTo(6));
 	}
 
 	@Test
