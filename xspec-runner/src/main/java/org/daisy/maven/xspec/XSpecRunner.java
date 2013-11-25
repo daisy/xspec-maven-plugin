@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.transform.ErrorListener;
@@ -40,6 +41,7 @@ import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XdmDestination;
+import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XsltCompiler;
@@ -50,7 +52,9 @@ import org.apache.xml.resolver.CatalogManager;
 import org.apache.xml.resolver.tools.CatalogResolver;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Collections2;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
@@ -72,6 +76,7 @@ public class XSpecRunner {
 	private XPathCompiler xpathCompiler;
 	private XsltExecutable xspecCompilerLoader;
 	private XsltExecutable xspecHtmlFormatterLoader;
+	private XsltExecutable xspecHtmlSummaryFormatterLoader;
 	private XsltExecutable xspecJUnitFormatterLoader;
 	private InputSupplier<InputStream> cssSupplier;
 
@@ -85,6 +90,7 @@ public class XSpecRunner {
 			builder.addSubResults(runSingle(test.getKey(), test.getValue(),
 					reportDir));
 		}
+		writeSummaryReport(tests.keySet(), reportDir);
 		return builder.build();
 	}
 
@@ -207,6 +213,32 @@ public class XSpecRunner {
 		return result;
 	}
 
+	/*
+	 * Write HTML summary report
+	 * Assumes XSpec reports were written to <reportDir>/XSPEC-<testName>.xml
+	 * and HTML reports were written to <reportDir>/HTML-<testName>.html
+	 */
+	private void writeSummaryReport(Set<String> testNames, File reportDir) {
+		try {
+			XsltTransformer formatter = xspecHtmlSummaryFormatterLoader.load();
+			formatter.setInitialTemplate(new QName("main"));
+			formatter.setParameter(new QName("test-names"), new XdmValue(
+					Collections2.<String,XdmItem>transform(
+						testNames,
+						new Function<String,XdmItem>() {
+							public XdmItem apply(String s) {
+								return new XdmAtomicValue(s); }})));
+			formatter.setParameter(new QName("report-dir"),
+					new XdmAtomicValue(reportDir.toURI()));
+			formatter.setDestination(
+					new Serializer(new File(reportDir, "index.html")));
+			formatter.setMessageListener(SaxonSinkReporter.INSTANCE);
+			formatter.transform();
+		} catch (SaxonApiException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public void init() {
 		try {
 
@@ -226,6 +258,10 @@ public class XSpecRunner {
 		// Initialize the XSpec report formatter
 		xspecHtmlFormatterLoader = xsltCompiler
 				.compile(getXSpecSource("/xspec/reporter/format-xspec-report.xsl"));
+
+		// Initialize the XSpec summary formatter
+		xspecHtmlSummaryFormatterLoader = xsltCompiler
+				.compile(getXSpecSource("/xspec-extra/format-xspec-summary.xsl"));
 
 		// Initialize the JUnit report formatter
 		xspecJUnitFormatterLoader = xsltCompiler
