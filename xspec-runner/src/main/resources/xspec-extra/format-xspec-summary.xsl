@@ -23,11 +23,11 @@
 					<xsl:when test="doc-available($report-uri)">
 						<xsl:variable name="report" select="doc($report-uri)/x:report"/>
 						<xsl:variable name="pending" as="xs:integer"
-						              select="count($report/x:scenario/x:test[@pending='true'])"/>
+						              select="count($report/x:scenario/x:test[@pending])"/>
 						<xsl:variable name="passed" as="xs:integer"
-						              select="count($report/x:scenario/x:test[not(@pending='true') and @successful='true'])"/>
+						              select="count($report/x:scenario/x:test[not(@pending) and @successful='true'])"/>
 						<xsl:variable name="failed" as="xs:integer"
-						              select="count($report/x:scenario/x:test[not(@pending='true') and @successful='false'])"/>
+						              select="count($report/x:scenario/x:test[not(@pending) and @successful='false'])"/>
 						<xsl:variable name="total" as="xs:integer" select="count($report/x:scenario/x:test)"/>
 						<tr class="{ if ($failed &gt; 0) then 'failed'
 						             else if ($pending &gt; 0) then 'pending'
