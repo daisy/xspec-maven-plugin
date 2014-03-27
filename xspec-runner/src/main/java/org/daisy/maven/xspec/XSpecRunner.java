@@ -55,6 +55,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
@@ -92,6 +93,17 @@ public class XSpecRunner {
 		}
 		writeSummaryReport(tests.keySet(), reportDir);
 		return builder.build();
+	}
+	
+	public TestResults run(File testDir, File reportDir) {
+		Map<String, File> tests = new HashMap<String, File>();
+		for (File file : listXSpecFilesRecursively(testsDir))
+			tests.put(
+				file.getAbsolutePath().substring(testsDir.getAbsolutePath().length() + 1)
+					.replaceAll("\\.xspec$", "")
+					.replaceAll("[\\./\\\\]", "_"),
+				file);
+		return run(tests, reportDir);
 	}
 
 	private TestResults runSingle(String testName, File testFile, File reportDir) {
@@ -289,6 +301,20 @@ public class XSpecRunner {
 	private static Source getXSpecSource(String path) {
 		return new StreamSource(XSpecRunner.class.getResourceAsStream(path),
 				"xspec:" + path);
+	}
+	
+	/*
+	 * FileUtils.listFiles from Apache Commons IO could be used here as well,
+	 * but would introduce another dependency.
+	 */
+	private static Collection<File> listXSpecFilesRecursively(File directory) {
+		ImmutableList.Builder<File> builder = new ImmutableList.Builder<File>();
+		for (File file : directory.listFiles()) {
+			if (file.isDirectory())
+				builder.addAll(listXSpecFilesRecursively(file));
+			else if (file.getName.endsWith(".xspec"))
+				builder.add(file); }
+		return builder.build();
 	}
 
 	private static class SaxonReporter implements ErrorListener,
