@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.transform.ErrorListener;
@@ -40,6 +41,7 @@ import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XPathCompiler;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XdmDestination;
+import net.sf.saxon.s9api.XdmItem;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.s9api.XdmValue;
 import net.sf.saxon.s9api.XsltCompiler;
@@ -50,7 +52,10 @@ import org.apache.xml.resolver.CatalogManager;
 import org.apache.xml.resolver.tools.CatalogResolver;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
@@ -72,15 +77,12 @@ public class XSpecRunner {
 	private XPathCompiler xpathCompiler;
 	private XsltExecutable xspecCompilerLoader;
 	private XsltExecutable xspecHtmlFormatterLoader;
+	private XsltExecutable xspecHtmlSummaryFormatterLoader;
 	private XsltExecutable xspecJUnitFormatterLoader;
 	private InputSupplier<InputStream> cssSupplier;
 
-	public XSpecRunner() {
-		try {
-			init();
-		} catch (SaxonApiException e) {
-			throw new IllegalStateException(e);
-		}
+	public void setProcessor(Processor processor) {
+		this.processor = processor;
 	}
 
 	public TestResults run(Map<String, File> tests, File reportDir) {
@@ -89,7 +91,19 @@ public class XSpecRunner {
 			builder.addSubResults(runSingle(test.getKey(), test.getValue(),
 					reportDir));
 		}
+		writeSummaryReport(tests.keySet(), reportDir);
 		return builder.build();
+	}
+	
+	public TestResults run(File testDir, File reportDir) {
+		Map<String, File> tests = new HashMap<String, File>();
+		for (File file : listXSpecFilesRecursively(testsDir))
+			tests.put(
+				file.getAbsolutePath().substring(testsDir.getAbsolutePath().length() + 1)
+					.replaceAll("\\.xspec$", "")
+					.replaceAll("[\\./\\\\]", "_"),
+				file);
+		return run(tests, reportDir);
 	}
 
 	private TestResults runSingle(String testName, File testFile, File reportDir) {
@@ -211,9 +225,38 @@ public class XSpecRunner {
 		return result;
 	}
 
-	private void init() throws SaxonApiException {
+	/*
+	 * Write HTML summary report
+	 * Assumes XSpec reports were written to <reportDir>/XSPEC-<testName>.xml
+	 * and HTML reports were written to <reportDir>/HTML-<testName>.html
+	 */
+	private void writeSummaryReport(Set<String> testNames, File reportDir) {
+		try {
+			XsltTransformer formatter = xspecHtmlSummaryFormatterLoader.load();
+			formatter.setInitialTemplate(new QName("main"));
+			formatter.setParameter(new QName("test-names"), new XdmValue(
+					Collections2.<String,XdmItem>transform(
+						testNames,
+						new Function<String,XdmItem>() {
+							public XdmItem apply(String s) {
+								return new XdmAtomicValue(s); }})));
+			formatter.setParameter(new QName("report-dir"),
+					new XdmAtomicValue(reportDir.toURI()));
+			formatter.setDestination(
+					new Serializer(new File(reportDir, "index.html")));
+			formatter.setMessageListener(SaxonSinkReporter.INSTANCE);
+			formatter.transform();
+		} catch (SaxonApiException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void init() {
+		try {
+
 		System.setProperty("xml.catalog.ignoreMissing", "true");
-		processor = new Processor(false);
+		if (processor == null)
+			processor = new Processor(false);
 		defaultResolver = processor.getUnderlyingConfiguration()
 				.getURIResolver();
 
@@ -228,6 +271,10 @@ public class XSpecRunner {
 		xspecHtmlFormatterLoader = xsltCompiler
 				.compile(getXSpecSource("/xspec/reporter/format-xspec-report.xsl"));
 
+		// Initialize the XSpec summary formatter
+		xspecHtmlSummaryFormatterLoader = xsltCompiler
+				.compile(getXSpecSource("/xspec-extra/format-xspec-summary.xsl"));
+
 		// Initialize the JUnit report formatter
 		xspecJUnitFormatterLoader = xsltCompiler
 				.compile(getXSpecSource("/xspec-extra/format-junit-report.xsl"));
@@ -240,6 +287,10 @@ public class XSpecRunner {
 		// Input supplier for the report CSS
 		cssSupplier = Resources.newInputStreamSupplier(XSpecRunner.class
 				.getResource("/xspec/reporter/test-report.css"));
+
+		} catch (SaxonApiException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	private static void report(String message, PrintWriter writer) {
@@ -250,6 +301,20 @@ public class XSpecRunner {
 	private static Source getXSpecSource(String path) {
 		return new StreamSource(XSpecRunner.class.getResourceAsStream(path),
 				"xspec:" + path);
+	}
+	
+	/*
+	 * FileUtils.listFiles from Apache Commons IO could be used here as well,
+	 * but would introduce another dependency.
+	 */
+	private static Collection<File> listXSpecFilesRecursively(File directory) {
+		ImmutableList.Builder<File> builder = new ImmutableList.Builder<File>();
+		for (File file : directory.listFiles()) {
+			if (file.isDirectory())
+				builder.addAll(listXSpecFilesRecursively(file));
+			else if (file.getName.endsWith(".xspec"))
+				builder.add(file); }
+		return builder.build();
 	}
 
 	private static class SaxonReporter implements ErrorListener,
