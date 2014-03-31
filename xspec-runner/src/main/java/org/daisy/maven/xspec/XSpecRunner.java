@@ -104,7 +104,7 @@ public class XSpecRunner {
 		XdmDestination xspecTestCompiled = new XdmDestination();
 		SaxonApiException executionException = null;
 
-		Stopwatch stopwatch = new Stopwatch().start();
+		Stopwatch stopwatch = Stopwatch.createStarted();
 		report("Running " + testName, writer);
 
 		try {
