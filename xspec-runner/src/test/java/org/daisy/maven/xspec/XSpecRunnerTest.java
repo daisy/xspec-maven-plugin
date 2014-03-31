@@ -33,7 +33,7 @@ import com.google.common.io.Files;
 public class XSpecRunnerTest {
 
 	private static PrintStream SYSOUT = System.out;
-	private static File testsDir = new File(new File(XSpecMojoTest.class
+	private static File testsDir = new File(new File(XSpecRunnerTest.class
 			.getResource("/").getPath()), "xspec-real");
 	private XSpecRunner xspecRunner;
 	private File reportDir;
@@ -42,6 +42,7 @@ public class XSpecRunnerTest {
 	public void setup() {
 		System.setOut(new PrintStream(ByteStreams.nullOutputStream()));
 		xspecRunner = new XSpecRunner();
+		xspecRunner.init();
 		reportDir = Files.createTempDir();
 		reportDir.deleteOnExit();
 	}
@@ -113,12 +114,13 @@ public class XSpecRunnerTest {
 		Map<String, File> tests = ImmutableMap.of("test", new File(testsDir,
 				"test.xspec"));
 		xspecRunner.run(tests, reportDir);
-		assertThat(reportDir.list().length, equalTo(5));
+		assertThat(reportDir.list().length, equalTo(6));
 		assertThat(reportDir.list(), hasItemInArray("xspec-report.css"));
 		assertThat(reportDir.list(), hasItemInArray("OUT-test.txt"));
 		assertThat(reportDir.list(), hasItemInArray("HTML-test.html"));
 		assertThat(reportDir.list(), hasItemInArray("XSPEC-test.xml"));
 		assertThat(reportDir.list(), hasItemInArray("TEST-test.xml"));
+		assertThat(reportDir.list(), hasItemInArray("index.html"));
 	}
 
 	@Test
@@ -126,8 +128,9 @@ public class XSpecRunnerTest {
 		Map<String, File> tests = ImmutableMap.of("test", new File(testsDir,
 				"error.xspec"));
 		xspecRunner.run(tests, reportDir);
-		assertThat(reportDir.list().length, equalTo(1));
+		assertThat(reportDir.list().length, equalTo(2));
 		assertThat(reportDir.list(), hasItemInArray("OUT-test.txt"));
+		assertThat(reportDir.list(), hasItemInArray("index.html"));
 	}
 
 	@Test
@@ -135,7 +138,7 @@ public class XSpecRunnerTest {
 		Map<String, File> tests = ImmutableMap.of("complete", new File(
 				testsDir, "complete.xspec"));
 		xspecRunner.run(tests, reportDir);
-		assertThat(reportDir.list().length, equalTo(5));
+		assertThat(reportDir.list().length, equalTo(6));
 	}
 
 	@Test
