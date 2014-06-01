@@ -149,6 +149,20 @@ public class XSpecRunnerTest {
 		assertThat(results.toString(),
 				startsWith("Tests run: 1, Failures: 0, Errors: 0, Skipped: 0"));
 	}
+	
+	@Test
+	public void testMultiMockCatalog() {
+		Map<String, File> tests = ImmutableMap.of("mocking", new File(testsDir,
+				"mocking/test.xspec"));
+		TestResults results = xspecRunner.run(tests, reportDir);
+		assertThat(results.toString(),
+				startsWith("Tests run: 1, Failures: 0, Errors: 0, Skipped: 0"));
+		tests = ImmutableMap.of("mocking2", new File(testsDir,
+				"mocking2/test.xspec"));
+		results = xspecRunner.run(tests, reportDir);
+		assertThat(results.toString(),
+				startsWith("Tests run: 1, Failures: 0, Errors: 0, Skipped: 0"));
+	}
 
 	@Test
 	public void testNoMockCatalog() {

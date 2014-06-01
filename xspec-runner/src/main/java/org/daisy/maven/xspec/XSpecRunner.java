@@ -143,6 +143,7 @@ public class XSpecRunner {
 			URIResolver testResolver = defaultResolver;
 			if (catalog.exists()) {
 				CatalogManager catman = new CatalogManager();
+				catman.setUseStaticCatalog(false);
 				catman.setCatalogFiles(catalog.getPath());
 				testResolver = new CatalogResolver(catman);
 			}
