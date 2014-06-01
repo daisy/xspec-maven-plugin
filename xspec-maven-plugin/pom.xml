@@ -34,23 +34,40 @@
       <name>Romain Deltour</name>
       <email>rdeltour@gmail.com</email>
     </developer>
+    <developer>
+      <id>bertfrees</id>
+      <name>Bert Frees</name>
+      <email>bertfrees@gmail.com</email>
+    </developer>
   </developers>
-  
+
   <scm>
-    <connection>scm:git:https://github.com/daisy-consortium/xspec-maven-plugin.git</connection>
-    <url>scm:git:https://github.com/daisy-consortium/xspec-maven-plugin.git</url>
-    <developerConnection>scm:git:https://github.com/daisy-consortium/xspec-maven-plugin.git</developerConnection>
+    <url>http://github.com/daisy-consortium/xspec-maven-plugin</url>
+    <connection>scm:git:git@github.com:daisy-consortium/xspec-maven-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:daisy-consortium/xspec-maven-plugin.git</developerConnection>
   </scm>
-  
+
   <issueManagement>
-    <system>GitHub Issue Tracker</system>
+    <system>GitHub</system>
     <url>https://github.com/daisy-consortium/xspec-maven-plugin/issues</url>
   </issueManagement>
-  
+
+  <ciManagement>
+      <system>Travis CI</system>
+      <url>http://travis-ci.org/daisy-consortium/xspec-maven-plugin</url>
+  </ciManagement>
+
+  <distributionManagement>
+    <site>
+      <id>site</id>
+      <url>scm:git:https://github.com/daisy-consortium/xspec-maven-plugin.git</url>
+    </site>
+  </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <current.year>2013</current.year>
+    <xspecVersion>0.3.0</xspecVersion>
   </properties>
 
   <dependencies>
@@ -156,6 +173,8 @@
             <exclude>src/main/resources/xspec/**</exclude>
             <exclude>src/test/resources/**</exclude>
             <exclude>src/it/**</exclude>
+            <exclude>src/site/**</exclude>
+            <exclude>src/changes/**</exclude>
           </excludes>
           <useDefaultExcludes>true</useDefaultExcludes>
           <encoding>UTF-8</encoding>
@@ -174,7 +193,89 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <inputEncoding>UTF-8</inputEncoding>
+          <outputEncoding>UTF-8</outputEncoding>
+          <skipDeploy>true</skipDeploy>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+        <version>0.9</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>site</goal>
+            </goals>
+            <phase>site-deploy</phase>
+            <configuration>
+              <server>github</server>
+              <message>Creating site for ${project.version}</message>
+              <merge>true</merge>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.7</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>summary</report>
+              <report>license</report>
+              <report>project-team</report>
+              <report>dependency-info</report>
+              <report>dependencies</report>
+              <report>scm</report>
+              <report>issue-tracking</report>
+              <report>cim</report>
+              <report>distribution-management</report>
+              <report>plugins</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>3.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.15</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changes-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+            <githubAPIScheme>https</githubAPIScheme>
+            <githubAPIPort>443</githubAPIPort>
+            <onlyMilestoneIssues>false</onlyMilestoneIssues>
+            <includeOpenIssues>false</includeOpenIssues>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>changes-report</report>
+              <report>github-report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>
