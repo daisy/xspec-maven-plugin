@@ -7,7 +7,7 @@
     <author>Romain Delltour</author>
   </properties>
   <body>
-    <release version="1.0.0" date="31 March 2014" description="Initial release">
+    <release version="1.0.0" date="June 1st, 2014" description="Initial release">
       <action type="add" dev="rdeltour">
         Initial release of the XSpec Maven Plugin.
       </action>
