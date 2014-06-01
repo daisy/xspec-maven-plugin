@@ -10,7 +10,7 @@
 
   <groupId>org.daisy.maven</groupId>
   <artifactId>xspec-maven-plugin</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>XSpec Maven Plugin</name>
@@ -43,7 +43,7 @@
     <url>http://github.com/daisy/xspec-maven-plugin</url>
     <connection>scm:git:git@github.com:daisy/xspec-maven-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:daisy/xspec-maven-plugin.git</developerConnection>
-    <tag>v1.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <issueManagement>
@@ -73,7 +73,7 @@
     <dependency>
       <groupId>org.daisy.maven</groupId>
       <artifactId>xspec-runner</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
