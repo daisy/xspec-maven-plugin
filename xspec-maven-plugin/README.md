@@ -1,1 +1,0 @@
-[![Build Status](https://travis-ci.org/daisy-consortium/xspec-maven-plugin.png?branch=master)](https://travis-ci.org/daisy-consortium/xspec-maven-plugin)
