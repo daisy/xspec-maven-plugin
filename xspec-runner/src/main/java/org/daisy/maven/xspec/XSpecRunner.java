@@ -130,7 +130,8 @@ public class XSpecRunner {
 		try {
 			// Compile the XSPec test into an executable XSLT
 			XsltTransformer xspecCompiler = xspecCompilerLoader.load();
-			xspecCompiler.setSource(new StreamSource(testFile));
+			Source testAsSource = new StreamSource(testFile);
+			xspecCompiler.setSource(testAsSource);
 			xspecCompiler.setDestination(xspecTestCompiled);
 			xspecCompiler.setErrorListener(saxonReporter);
 			xspecCompiler.setMessageListener(saxonReporter);
@@ -153,8 +154,10 @@ public class XSpecRunner {
 			xspecTestCompiler.setURIResolver(new XSpecResolver(testResolver));
 			processor.getUnderlyingConfiguration().setErrorListener(
 					saxonReporter);
+			Source compiledTestAsSource = xspecTestCompiled.getXdmNode().asSource();
+			compiledTestAsSource.setSystemId(testAsSource.getSystemId());
 			XsltTransformer xspecTestRunner = xspecTestCompiler.compile(
-					xspecTestCompiled.getXdmNode().asSource()).load();
+					compiledTestAsSource).load();
 			xspecTestRunner.setInitialTemplate(XSPEC_MAIN_TEMPLATE);
 			xspecTestRunner.setDestination(xspecTestResult);
 			xspecTestRunner.setErrorListener(saxonReporter);
