@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec" xmlns:functx="http://www.functx.com" stylesheet="my.xsl">
+    <x:scenario label="When file contains a well formed xml">
+        <x:context href="input.xml"/>
+        <x:expect label="The result contains a well formed xml with expected values" href="result.xml"/>
+    </x:scenario>
+</x:description>
