@@ -315,11 +315,12 @@ public class XSpecRunner {
 	 */
 	private static Collection<File> listXSpecFilesRecursively(File directory) {
 		ImmutableList.Builder<File> builder = new ImmutableList.Builder<File>();
-		for (File file : directory.listFiles()) {
-			if (file.isDirectory())
-				builder.addAll(listXSpecFilesRecursively(file));
-			else if (file.getName().endsWith(".xspec"))
-				builder.add(file); }
+		if (directory.isDirectory())
+			for (File file : directory.listFiles()) {
+				if (file.isDirectory())
+					builder.addAll(listXSpecFilesRecursively(file));
+				else if (file.getName().endsWith(".xspec"))
+					builder.add(file); }
 		return builder.build();
 	}
 
