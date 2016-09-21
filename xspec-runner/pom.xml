@@ -34,6 +34,23 @@
       <version>1.2_5</version>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>4.3.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.daisy.pipeline</groupId>
+      <artifactId>ds-to-spi-runtime</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
@@ -70,11 +87,27 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Service-Component>
-              OSGI-INF/xspec-runner.xml
-            </Service-Component>
+            <_dsannotations>org.daisy.maven.xspec.XSpecRunner</_dsannotations>
+            <Import-Package>!org.daisy.common.spi,*</Import-Package>
           </instructions>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.daisy.pipeline.build</groupId>
+        <artifactId>ds-to-spi-maven-plugin</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>generate-spi-classes</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-spi-classes</goal>
+            </goals>
+            <configuration>
+              <includes>org.daisy.maven.xspec.XSpecRunner</includes>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -25,8 +25,10 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.transform.ErrorListener;
@@ -64,6 +66,16 @@ import com.google.common.io.Files;
 import com.google.common.io.InputSupplier;
 import com.google.common.io.Resources;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+
+@Component(
+	name = "xspec-runner",
+	service = { XSpecRunner.class }
+)
 public class XSpecRunner {
 
 	private final static String XSPEC_NAMESPACE = "http://www.jenitennison.com/xslt/xspec";
@@ -85,6 +97,13 @@ public class XSpecRunner {
 	private XsltExecutable xspecJUnitFormatterLoader;
 	private InputSupplier<InputStream> cssSupplier;
 
+	@Reference(
+		name = "Processor",
+		unbind = "-",
+		service = Processor.class,
+		cardinality = ReferenceCardinality.MANDATORY,
+		policy = ReferencePolicy.STATIC
+	)
 	public void setProcessor(Processor processor) {
 		this.processor = processor;
 	}
@@ -302,6 +321,7 @@ public class XSpecRunner {
 		}
 	}
 
+	@Activate
 	public void init() {
 		try {
 
