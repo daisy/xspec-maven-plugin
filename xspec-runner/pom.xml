@@ -10,7 +10,7 @@
   
   <groupId>org.daisy.maven</groupId>
   <artifactId>xspec-runner</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
   
   <properties>
@@ -78,8 +78,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <tag>xspec-runner-1.0.2</tag>
-  </scm>
 </project>
