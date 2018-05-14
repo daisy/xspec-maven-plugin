@@ -452,6 +452,9 @@ public class XSpecRunner {
 					InputStream is = XSpecRunner.class.getResourceAsStream(uri
 							.substring(6));
 					return new StreamSource(is, uri);
+				} else if (uri.contains("!/") && uri.startsWith("file:")) {
+					Source s = delegate.resolve("jar:" + uri, base);
+					if (s != null) return s;
 				}
 			} catch (URISyntaxException e) {
 				// Do nothing
