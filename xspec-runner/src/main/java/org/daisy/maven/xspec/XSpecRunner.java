@@ -201,7 +201,6 @@ public class XSpecRunner {
 			processor.getUnderlyingConfiguration().setErrorListener(
 					saxonReporter);
 			Source compiledTestAsSource = xspecTestCompiled.getXdmNode().asSource();
-			compiledTestAsSource.setSystemId(testAsSource.getSystemId());
 			XsltTransformer xspecTestRunner = xspecTestCompiler.compile(
 					compiledTestAsSource).load();
 			xspecTestRunner.setInitialTemplate(XSPEC_MAIN_TEMPLATE);
@@ -234,7 +233,7 @@ public class XSpecRunner {
 				// Write XSpec report
 				File xspecReport = new File(reportDir, "XSPEC-" + testName
 						+ ".xml");
-				new Serializer(xspecReport).serializeNode(xspecTestResult
+				serializeToFile(xspecReport).serializeNode(xspecTestResult
 						.getXdmNode());
 
 				// Write HTML report
@@ -248,7 +247,7 @@ public class XSpecRunner {
 				htmlFormatter
 						.setSource(xspecTestResult.getXdmNode().asSource());
 				htmlFormatter.setParameter(XSPEC_CSS_URI_PARAM, XSPEC_CSS_URI);
-				htmlFormatter.setDestination(new Serializer(htmlReport));
+				htmlFormatter.setDestination(serializeToFile(htmlReport));
 				htmlFormatter.setMessageListener(SaxonSinkReporter.INSTANCE);
 				htmlFormatter.transform();
 
@@ -259,7 +258,7 @@ public class XSpecRunner {
 						.load();
 				junitFormatter.setSource(xspecTestResult.getXdmNode()
 						.asSource());
-				junitFormatter.setDestination(new Serializer(surefireReport));
+				junitFormatter.setDestination(serializeToFile(surefireReport));
 				junitFormatter.setParameter(JUNIT_NAME_PARAM,
 						new XdmAtomicValue(testName));
 				junitFormatter.setParameter(
@@ -295,12 +294,21 @@ public class XSpecRunner {
 			formatter.setParameter(new QName("report-dir"),
 					new XdmAtomicValue(reportDir.toURI()));
 			formatter.setDestination(
-					new Serializer(new File(reportDir, "index.html")));
+					serializeToFile(new File(reportDir, "index.html")));
 			formatter.setMessageListener(SaxonSinkReporter.INSTANCE);
 			formatter.transform();
 		} catch (SaxonApiException e) {
 			throw new RuntimeException(e);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
 		}
+	}
+
+	private Serializer serializeToFile(File file) throws FileNotFoundException {
+		Serializer serializer = processor.newSerializer();
+		serializer.setOutputStream(new FileOutputStream(file));
+		serializer.setCloseOnCompletion(true);
+		return serializer;
 	}
 
 	public void init() {

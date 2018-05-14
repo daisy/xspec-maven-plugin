@@ -26,7 +26,7 @@
     <dependency>
       <groupId>org.daisy.libs</groupId>
       <artifactId>saxon-he</artifactId>
-      <version>9.5.1.5-1</version>
+      <version>9.8.0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>
@@ -71,7 +71,7 @@
         <configuration>
           <instructions>
             <Import-Package>
-              net.sf.saxon.*;version="[9.5.1,9.5.2)",
+              net.sf.saxon.*;version="[9.8.0,9.8.1)",
               *
             </Import-Package>
             <Service-Component>
