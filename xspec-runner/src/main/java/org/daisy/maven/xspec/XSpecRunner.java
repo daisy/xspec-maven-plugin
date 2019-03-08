@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -452,6 +453,9 @@ public class XSpecRunner {
 					InputStream is = XSpecRunner.class.getResourceAsStream(uri
 							.substring(6));
 					return new StreamSource(is, uri);
+				} else if (Pattern.compile("\\.(zip|jar)!/").matcher(uri).find() && uri.startsWith("file:")) {
+					Source s = delegate.resolve("jar:" + uri, base);
+					if (s != null) return s;
 				}
 			} catch (URISyntaxException e) {
 				// Do nothing
